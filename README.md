@@ -35,6 +35,8 @@ tasks-to-ado            → create child work items under the ticket (outbound)
 | `specs/001-order-submission/` | Worked sample spec (async purchase-order submission) |
 | `src/SddDemo.Functions/` | .NET 8 isolated Functions app (thin adapters) |
 | `tests/SddDemo.Functions.Tests/` | xUnit + FluentAssertions + NSubstitute (runs offline) |
+| `docs/` | Architecture docs + decision records ([index](docs/README.md)) |
+| `CONTRIBUTING.md` | How to add a feature + the vertical-slice checklist |
 
 ## Build & test
 
