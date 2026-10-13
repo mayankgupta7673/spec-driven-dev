@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spec-Driven Development</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#121a33; --ink:#e8edff; --muted:#9fb0d8;
+    --brand:#6ea8fe; --brand2:#7af0c8; --accent:#ffd166; --danger:#ff6b8b;
+    --card:#161f3d; --line:#28345c; --radius:18px;
+    --font:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font); color:var(--ink);
+    background:radial-gradient(1200px 800px at 80% -10%,#1b2a55 0%,transparent 60%),
+               radial-gradient(1000px 700px at -10% 110%,#13324a 0%,transparent 55%),
+               var(--bg);
+    overflow:hidden;
+  }
+  .deck{height:100vh;width:100vw;position:relative}
+  .slide{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    padding:6vh 8vw; opacity:0; transform:translateY(16px);
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .slide.active{display:flex; opacity:1; transform:none}
+  .eyebrow{color:var(--brand2); font-weight:700; letter-spacing:.14em; text-transform:uppercase; font-size:clamp(.7rem,1.1vw,.9rem); margin-bottom:12px}
+  h1{font-size:clamp(2.2rem,5.4vw,4.4rem); line-height:1.03; letter-spacing:-.02em}
+  h2{font-size:clamp(1.6rem,3.4vw,2.8rem); line-height:1.08; letter-spacing:-.01em; margin-bottom:10px}
+  p.lead{font-size:clamp(1rem,1.7vw,1.4rem); color:var(--muted); max-width:52ch; margin-top:14px; line-height:1.5}
+  .grad{background:linear-gradient(100deg,var(--brand),var(--brand2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .fill{flex:1}
+  .grid{display:grid; gap:18px}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-4{grid-template-columns:repeat(4,1fr)}
+  .card{
+    background:linear-gradient(180deg,var(--card),#121a35);
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 20px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .card h3{font-size:clamp(1rem,1.5vw,1.25rem); margin-bottom:6px; display:flex; align-items:center; gap:10px}
+  .card p{color:var(--muted); font-size:clamp(.85rem,1.2vw,1rem); line-height:1.45}
+  .ico{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:rgba(110,168,254,.14);border:1px solid rgba(110,168,254,.3)}
+  .ico svg{width:20px;height:20px;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.85rem;background:rgba(255,255,255,.02)}
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:10px}
+  ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:clamp(.95rem,1.4vw,1.2rem);color:var(--ink)}
+  ul.clean li b{color:#fff}
+  ul.clean li span.muted{color:var(--muted)}
+  .check{width:26px;height:26px;flex:none;border-radius:8px;background:rgba(122,240,200,.14);border:1px solid rgba(122,240,200,.4);display:grid;place-items:center}
+  .check svg{width:16px;height:16px;stroke:var(--brand2);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .x{background:rgba(255,107,139,.12);border-color:rgba(255,107,139,.4)}
+  .x svg{stroke:var(--danger)}
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:8px}
+  .step{position:relative;background:linear-gradient(180deg,var(--card),#121a35);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:140px;flex:1}
+  .step .n{font-size:.72rem;color:var(--brand2);font-weight:700;letter-spacing:.1em}
+  .step .t{font-weight:700;margin:4px 0 2px;font-size:clamp(.9rem,1.2vw,1.05rem)}
+  .step .s{color:var(--muted);font-size:.8rem}
+  .arrow{align-self:center;color:var(--brand);font-size:1.4rem;padding:0 6px;opacity:.7}
+  .loopback{margin-top:14px;color:var(--muted);font-size:.9rem;display:flex;align-items:center;gap:8px}
+  .kpis{display:flex;gap:28px;flex-wrap:wrap;margin-top:10px}
+  .kpi .big{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;line-height:1}
+  .kpi .lbl{color:var(--muted);font-size:.9rem;margin-top:6px}
+  code{font-family:'Cascadia Code',Consolas,monospace;background:rgba(255,255,255,.06);padding:2px 7px;border-radius:7px;color:#dfe8ff;font-size:.95em}
+  .mono{font-family:'Cascadia Code',Consolas,monospace;font-size:clamp(.8rem,1.1vw,1rem);line-height:1.6;color:#d7e2ff;background:#0d1430;border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .mono .c{color:#7af0c8}.mono .k{color:#ffd166}.mono .m{color:#9fb0d8}
+  .brandbar{position:absolute;left:8vw;right:8vw;bottom:3.2vh;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.8rem}
+  .dots{display:flex;gap:7px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+  .dot.on{background:var(--brand);box-shadow:0 0 0 4px rgba(110,168,254,.15)}
+  .nav{position:fixed;right:22px;bottom:18px;display:flex;gap:10px;z-index:20}
+  .nav button{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.2rem;cursor:pointer;transition:.2s}
+  .nav button:hover{border-color:var(--brand);color:var(--brand)}
+  .progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--brand),var(--brand2));width:0;z-index:30;transition:width .4s ease}
+  .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:rgba(122,240,200,.1);border:1px solid rgba(122,240,200,.35);color:var(--brand2);font-weight:600;font-size:.9rem}
+  .two{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;flex:1}
+  .hint{position:fixed;left:22px;bottom:18px;color:var(--muted);font-size:.78rem;opacity:.7}
+  @media(max-width:860px){.two{grid-template-columns:1fr}.cols-3,.cols-4,.cols-2{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide">
+    <div class="fill" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="badge" style="width:max-content;margin-bottom:22px">● Spec-Kit · GitHub Copilot · Azure Functions</div>
+      <div class="eyebrow">A better way to build software with AI</div>
+      <h1>Spec-Driven<br><span class="grad">Development</span></h1>
+      <p class="lead">Define <b>what</b> and <b>why</b> before deciding <b>how</b>. Turn requirements into a living spec, a plan, and tasks — then let AI implement against those artifacts, not a throwaway prompt.</p>
+      <div style="margin-top:26px" class="pill">Client demo · 2026</div>
+    </div>
+  </section>
+
+  <!-- 2 PROBLEM -->
+  <section class="slide">
+    <div class="eyebrow">The problem</div>
+    <h2>"Vibe coding" with AI doesn't scale</h2>
+    <div class="two">
+      <ul class="clean">
+        <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><b>Intent evaporates.</b> <span class="muted">A prompt is typed, code appears, the "why" is gone forever.</span></span></li>
+        <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><b>Nothing to review.</b> <span class="muted">Reviewers see code with no spec to check it against.</span></span></li>
+        <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><b>Inconsistent output.</b> <span class="muted">The same ask yields different results every run.</span></span></li>
+        <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><b>No traceability.</b> <span class="muted">You can't link a change back to a requirement or ticket.</span></span></li>
+      </ul>
+      <div class="card">
+        <h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>Prompt → Code</h3>
+        <p>The gap between a one-line prompt and production code is filled with the model's guesses — not your decisions.</p>
+        <div class="mono" style="margin-top:14px"><span class="m"># today</span><br>"add an endpoint to submit orders"<br><span class="m"># → 200 lines, unknown assumptions</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 WHAT IS SDD -->
+  <section class="slide">
+    <div class="eyebrow">The idea</div>
+    <h2>Make the <span class="grad">specification</span> the source of truth</h2>
+    <p class="lead">SDD inserts durable, reviewable artifacts between intent and implementation. The AI agent gets structured context at every step — so results are consistent, auditable, and aligned to the requirement.</p>
+    <div class="grid cols-3" style="margin-top:28px">
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg></span>Write it down</h3><p>Every feature begins as a <code>spec.md</code> — what & why, every requirement testable.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></span>Plan the how</h3><p>A plan turns requirements into architecture, contracts, and a data model.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Execute</h3><p>Dependency-ordered tasks drive the AI to build a tested vertical slice.</p></div>
+    </div>
+  </section>
+
+  <!-- 4 THE LOOP -->
+  <section class="slide">
+    <div class="eyebrow">The method</div>
+    <h2>One loop, every feature</h2>
+    <div class="flow">
+      <div class="step"><div class="n">00</div><div class="t">Constitution</div><div class="s">Guardrails, once</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">01</div><div class="t">Specify</div><div class="s">spec.md</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">02</div><div class="t">Clarify</div><div class="s">de-risk</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">03</div><div class="t">Plan</div><div class="s">plan + contracts</div></div>
+    </div>
+    <div class="flow" style="margin-top:14px">
+      <div class="step"><div class="n">04</div><div class="t">Tasks</div><div class="s">tasks.md</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">05</div><div class="t">Analyze</div><div class="s">consistency gate</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">06</div><div class="t">Implement</div><div class="s">code + tests</div></div>
+      <div class="arrow">↺</div>
+      <div class="step" style="border-color:rgba(122,240,200,.5)"><div class="n" style="color:var(--accent)">07</div><div class="t">Converge</div><div class="s">assess vs spec</div></div>
+    </div>
+    <div class="loopback"><span class="arrow" style="padding:0">↺</span> Repeat <b style="color:#fff;margin:0 4px">implement → converge</b> until the gap report says <span class="badge" style="padding:4px 10px">Converged</span></div>
+  </section>
+
+  <!-- 5 ARTIFACTS -->
+  <section class="slide">
+    <div class="eyebrow">Each phase feeds the next</div>
+    <h2>Artifacts, not vibes</h2>
+    <div class="two">
+      <div class="mono">
+<span class="m">specs/001-order-submission/</span><br>
+├── <span class="k">spec.md</span>          <span class="m"># what & why</span><br>
+├── <span class="k">plan.md</span>          <span class="m"># how — architecture</span><br>
+├── contracts/<br>
+│   └── <span class="c">orders-api.md</span>  <span class="m"># request/response</span><br>
+└── <span class="k">tasks.md</span>         <span class="m"># ordered checklist</span>
+      </div>
+      <ul class="clean">
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Reviewable.</b> <span class="muted">Each artifact is a PR-sized, human-readable file.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Versioned.</b> <span class="muted">The spec evolves in git alongside the code.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Structured context.</b> <span class="muted">The AI reads the prior artifact instead of guessing.</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6 TRACEABILITY -->
+  <section class="slide">
+    <div class="eyebrow">Fits your backlog</div>
+    <h2>From <span class="grad">ticket</span> to merged PR — one id</h2>
+    <p class="lead">Requirements originate in JIRA or Azure DevOps. The ticket id becomes the feature id and the single correlation key across the whole journey.</p>
+    <div style="margin-top:26px">
+      <svg viewBox="0 0 980 170" style="width:100%;height:auto">
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0l7 3-7 3z" fill="#6ea8fe"/></marker>
+          <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#6ea8fe"/><stop offset="1" stop-color="#7af0c8"/></linearGradient>
+        </defs>
+        <g font-family="Segoe UI" font-size="15" fill="#e8edff" text-anchor="middle">
+          <rect x="10" y="55" width="150" height="60" rx="12" fill="#161f3d" stroke="#28345c"/><text x="85" y="80">JIRA / ADO</text><text x="85" y="100" fill="#9fb0d8" font-size="12">ticket #1234</text>
+          <rect x="230" y="55" width="150" height="60" rx="12" fill="#161f3d" stroke="#28345c"/><text x="305" y="80">spec → plan</text><text x="305" y="100" fill="#9fb0d8" font-size="12">→ tasks</text>
+          <rect x="450" y="55" width="150" height="60" rx="12" fill="#161f3d" stroke="#28345c"/><text x="525" y="80">branch</text><text x="525" y="100" fill="#9fb0d8" font-size="12">1234-feature</text>
+          <rect x="670" y="55" width="150" height="60" rx="12" fill="#161f3d" stroke="#28345c"/><text x="745" y="80">Pull Request</text><text x="745" y="100" fill="#9fb0d8" font-size="12">refs #1234</text>
+          <rect x="840" y="55" width="130" height="60" rx="12" fill="url(#g1)"/><text x="905" y="90" fill="#0b1020" font-weight="700">Merged</text>
+          <line x1="162" y1="85" x2="226" y2="85" stroke="#6ea8fe" stroke-width="2" marker-end="url(#ah)"/>
+          <line x1="382" y1="85" x2="446" y2="85" stroke="#6ea8fe" stroke-width="2" marker-end="url(#ah)"/>
+          <line x1="602" y1="85" x2="666" y2="85" stroke="#6ea8fe" stroke-width="2" marker-end="url(#ah)"/>
+          <line x1="822" y1="85" x2="836" y2="85" stroke="#6ea8fe" stroke-width="2" marker-end="url(#ah)"/>
+          <text x="490" y="30" fill="#7af0c8" font-size="13">one correlation id end-to-end</text>
+          <line x1="85" y1="135" x2="905" y2="135" stroke="#28345c" stroke-dasharray="4 5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="grid cols-2" style="margin-top:22px">
+      <div class="card"><h3>Inbound</h3><p>A ticket seeds <code>spec.md</code> automatically — never re-typed, always enriched.</p></div>
+      <div class="card"><h3>Outbound</h3><p><code>tasks.md</code> creates child work items linked back under the same ticket.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 ARCHITECTURE -->
+  <section class="slide">
+    <div class="eyebrow">The demo under the hood</div>
+    <h2>Thin adapters, rich core</h2>
+    <div class="two">
+      <svg viewBox="0 0 460 320" style="width:100%;height:auto">
+        <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0l7 3-7 3z" fill="#7af0c8"/></marker></defs>
+        <g font-family="Segoe UI" font-size="14" fill="#e8edff" text-anchor="middle">
+          <rect x="150" y="10" width="160" height="46" rx="11" fill="#161f3d" stroke="#28345c"/><text x="230" y="38">HTTP trigger</text>
+          <rect x="130" y="95" width="200" height="46" rx="11" fill="#161f3d" stroke="#28345c"/><text x="230" y="123">SubmissionService</text>
+          <rect x="20" y="190" width="190" height="52" rx="11" fill="#12213f" stroke="#28345c"/><text x="115" y="212">IMessagePublisher</text><text x="115" y="230" fill="#9fb0d8" font-size="11">InMemory | Service Bus</text>
+          <rect x="250" y="190" width="190" height="52" rx="11" fill="#12213f" stroke="#28345c"/><text x="345" y="212">IStatusStore</text><text x="345" y="230" fill="#9fb0d8" font-size="11">InMemory | Azure SQL</text>
+          <rect x="120" y="275" width="220" height="40" rx="11" fill="#0d1430" stroke="#28345c"/><text x="230" y="300" fill="#9fb0d8" font-size="12">Models — pure records, no Azure SDK</text>
+          <line x1="230" y1="56" x2="230" y2="93" stroke="#7af0c8" stroke-width="2" marker-end="url(#ah2)"/>
+          <line x1="190" y1="141" x2="130" y2="188" stroke="#7af0c8" stroke-width="2" marker-end="url(#ah2)"/>
+          <line x1="270" y1="141" x2="330" y2="188" stroke="#7af0c8" stroke-width="2" marker-end="url(#ah2)"/>
+        </g>
+      </svg>
+      <ul class="clean">
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Triggers ≈ 30 lines.</b> <span class="muted">Bind, validate, dispatch, return.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Core is Azure-free.</b> <span class="muted">Unit tests run offline, no cloud.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Swap to Azure</b> <span class="muted">= two lines in <code>Program.cs</code>.</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8 LIVE DEMO -->
+  <section class="slide">
+    <div class="eyebrow">See it run</div>
+    <h2>Live: async order submission</h2>
+    <div class="two">
+      <div class="mono">
+<span class="m"># 1 — submit (202 + correlation id)</span><br>
+<span class="k">POST</span> /api/orders<br>
+{ "legalEntityId":"ABN-01", "lines":[…] }<br>
+<span class="c">→ 202 { "correlationId":"c5d4…" }</span><br><br>
+<span class="m"># 2 — query status</span><br>
+<span class="k">GET</span> /api/orders/c5d4…/status<br>
+<span class="c">→ 200 { "state":"Accepted" }</span><br><br>
+<span class="m"># 3 — resend same clientRequestId</span><br>
+<span class="c">→ same id · published once (idempotent)</span>
+      </div>
+      <ul class="clean">
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>202 + id</b> <span class="muted">— caller decoupled from slow writes.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Idempotent</b> <span class="muted">— safe retries, publish exactly once.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Validated</b> <span class="muted">— bad input → 400, nothing published.</span></span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>14 tests green</b> <span class="muted">— all offline.</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9 BENEFITS -->
+  <section class="slide">
+    <div class="eyebrow">Why it matters</div>
+    <h2>Outcomes, measured</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="big grad">1</div><div class="lbl">source of truth<br>(the spec)</div></div>
+      <div class="kpi"><div class="big grad">100%</div><div class="lbl">changes traceable<br>to a ticket</div></div>
+      <div class="kpi"><div class="big grad">0</div><div class="lbl">Azure needed to<br>run the tests</div></div>
+      <div class="kpi"><div class="big grad">2-line</div><div class="lbl">swap to real<br>Azure services</div></div>
+    </div>
+    <div class="grid cols-3" style="margin-top:34px">
+      <div class="card"><h3>Faster reviews</h3><p>Reviewers check code against a written spec, not their memory.</p></div>
+      <div class="card"><h3>Consistent AI</h3><p>Structured context constrains the model — repeatable results.</p></div>
+      <div class="card"><h3>Durable knowledge</h3><p>Intent and decisions live in git, surviving team changes.</p></div>
+    </div>
+  </section>
+
+  <!-- 10 TOOLING -->
+  <section class="slide">
+    <div class="eyebrow">How we run it</div>
+    <h2>The toolchain</h2>
+    <div class="grid cols-4" style="margin-top:20px">
+      <div class="card"><h3>Spec Kit</h3><p>Open-source SDD toolkit — the <code>/speckit.*</code> commands & templates.</p></div>
+      <div class="card"><h3>GitHub Copilot</h3><p>Runs the loop inside VS Code as slash-command skills.</p></div>
+      <div class="card"><h3>Azure Functions</h3><p>.NET 8 isolated worker — the deployable unit per feature.</p></div>
+      <div class="card"><h3>JIRA + ADO</h3><p>Backlog in, work items out — full round-trip traceability.</p></div>
+    </div>
+    <div class="mono" style="margin-top:26px">
+<span class="m">## install &amp; go</span><br>
+uvx --from git+https://github.com/github/spec-kit specify init my-app --integration copilot<br>
+<span class="c">/speckit.specify · /speckit.plan · /speckit.tasks · /speckit.implement</span>
+    </div>
+  </section>
+
+  <!-- 11 CLOSE -->
+  <section class="slide">
+    <div class="fill" style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start">
+      <div class="eyebrow">Constitution once · specify → plan → tasks → implement → converge per feature</div>
+      <h1>Spec first.<br><span class="grad">Then let AI build.</span></h1>
+      <p class="lead">Durable intent, reviewable artifacts, consistent output, and end-to-end traceability — the gold standard for AI-assisted delivery.</p>
+      <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+        <span class="pill">▶ Live demo: <code>func start</code> + <code>demo.http</code></span>
+        <span class="pill">📄 docs/ · ADRs · constitution</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="brandbar">
+  <div class="dots" id="dots"></div>
+  <div id="counter">01 / 11</div>
+</div>
+<div class="nav">
+  <button id="prev" aria-label="Previous">‹</button>
+  <button id="next" aria-label="Next">›</button>
+</div>
+<div class="hint">← → / Space to navigate · F for fullscreen</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dots=document.getElementById('dots');
+  const counter=document.getElementById('counter');
+  const progress=document.getElementById('progress');
+  let i=0;
+  slides.forEach((_,k)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>go(k);dots.appendChild(d);});
+  function go(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+    counter.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+    progress.style.width=((i)/(slides.length-1)*100)+'%';
+  }
+  function next(){go(i+1)} function prev(){go(i-1)}
+  document.getElementById('next').onclick=next;
+  document.getElementById('prev').onclick=prev;
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next();}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev();}
+    else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);
+    else if(e.key.toLowerCase()==='f'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+  });
+  let sx=0;
+  document.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50){dx<0?next():prev();}},{passive:true});
+  go(0);
+</script>
+</body>
+</html>

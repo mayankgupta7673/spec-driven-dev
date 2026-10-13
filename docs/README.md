@@ -30,3 +30,9 @@ traceability.
 ## Conventions
 
 See [../CONTRIBUTING.md](../CONTRIBUTING.md) for how to add a feature and the vertical-slice checklist.
+
+## Presentation
+
+A self-contained slide deck explaining Spec-Driven Development (open in any browser, works offline):
+[presentation/spec-driven-development.html](presentation/spec-driven-development.html).
+Navigate with ← → / Space; press F for fullscreen.
