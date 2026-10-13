@@ -11,8 +11,11 @@ running the spec-kit loop, not by ad-hoc prompting.
 
 ## The loop (do this for every feature)
 
-`/speckit.constitution` (once) → `/speckit.specify` → `/speckit.clarify` → `/speckit.plan`
-→ `/speckit.tasks` → `/speckit.analyze` → `/speckit.implement` → `/speckit.converge`
+Seed inbound from the backlog, then run the SDD loop:
+
+`jira-to-spec` / `ado-to-spec` (or `/speckit.specify` for net-new) → `/speckit.clarify`
+→ `/speckit.plan` → `/speckit.tasks` → `tasks-to-ado` → `/speckit.analyze`
+→ `/speckit.implement` → `/speckit.converge`
 
 Never write production code before a `spec.md` exists for the feature.
 
@@ -50,8 +53,13 @@ Never write production code before a `spec.md` exists for the feature.
 - Structured logging only: `log.LogInformation("Submitted {CorrelationId}", id)`.
 - One class per file; `Async` suffix on async methods; `I` prefix on interfaces; `Should_X_When_Y` tests.
 
-## Traceability to Azure DevOps
+## Traceability to the backlog (JIRA & Azure DevOps)
 
-After `/speckit.tasks`, map each task to an ADO work item (Epic → Feature → Story) using the
-prompt in [.github/prompts/tasks-to-ado.prompt.md](prompts/tasks-to-ado.prompt.md).
-Never create ADO work items without explicit human approval. Every PR references its Story id.
+Requirements originate in **JIRA or Azure DevOps**; the **ticket id is the feature id**
+(`proj-1234`, `ado-12345`) and the correlation key across ticket → spec → branch → PR.
+
+- **Inbound** (ticket → spec): [.github/prompts/jira-to-spec.prompt.md](prompts/jira-to-spec.prompt.md),
+  [.github/prompts/ado-to-spec.prompt.md](prompts/ado-to-spec.prompt.md).
+- **Outbound** (tasks → work items): [.github/prompts/tasks-to-ado.prompt.md](prompts/tasks-to-ado.prompt.md).
+
+Never create or modify a ticket/work item without explicit human approval. Every PR references its ticket id.

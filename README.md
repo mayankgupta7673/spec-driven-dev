@@ -1,18 +1,21 @@
 # SDD Azure Functions Demo
 
 A gold-standard reference showing **Spec-Driven Development (SDD)** on **.NET 8 isolated-worker
-Azure Functions**, wired for **GitHub Copilot** and **Azure DevOps** traceability.
+Azure Functions**, wired for **GitHub Copilot** and **JIRA + Azure DevOps** traceability.
 
 ## The idea
 
-Every feature is built by running the spec-kit loop — never by ad-hoc prompting:
+Requirements originate in **JIRA or Azure DevOps**; the **ticket id is the feature id** and the
+correlation key across ticket → spec → branch → PR. Every feature is built by running the loop —
+never by ad-hoc prompting:
 
 ```
 /speckit.constitution   (once per project)
-/speckit.specify        → specs/<feature>/spec.md
+jira-to-spec | ado-to-spec  → seed specs/<feature>/spec.md from the ticket (inbound)
 /speckit.clarify        → de-risk ambiguity
 /speckit.plan           → plan.md + contracts/ + data-model.md
 /speckit.tasks          → tasks.md (dependency-ordered)
+tasks-to-ado            → create child work items under the ticket (outbound)
 /speckit.analyze        → cross-artifact consistency gate
 /speckit.implement      → the vertical slice + tests
 /speckit.converge       → assess vs artifacts, append remaining work
@@ -25,7 +28,9 @@ Every feature is built by running the spec-kit loop — never by ad-hoc promptin
 | `.specify/memory/constitution.md` | Project principles — the non-negotiable guardrails |
 | `.specify/templates/` | spec / plan / tasks / checklist templates |
 | `.github/copilot-instructions.md` | Always-on rules for Copilot (mirrors the constitution) |
-| `.github/prompts/tasks-to-ado.prompt.md` | Map `tasks.md` → Azure DevOps Epic/Feature/Story |
+| `.github/prompts/jira-to-spec.prompt.md` | Seed `spec.md` from a JIRA issue (inbound) |
+| `.github/prompts/ado-to-spec.prompt.md` | Seed `spec.md` from an ADO work item (inbound) |
+| `.github/prompts/tasks-to-ado.prompt.md` | Map `tasks.md` → ADO Epic/Feature/Story (outbound) |
 | `.github/skills/speckit-*/` | The spec-kit slash-command skills |
 | `specs/001-order-submission/` | Worked sample spec (async purchase-order submission) |
 | `src/SddDemo.Functions/` | .NET 8 isolated Functions app (thin adapters) |

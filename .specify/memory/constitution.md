@@ -23,10 +23,13 @@ Unit tests (xUnit + FluentAssertions + NSubstitute) accompany every domain chang
 run without Azure infrastructure. Test names follow `Should_X_When_Y`. No `Thread.Sleep`,
 no random data, no `[Skip]` without a linked issue. Integration tests use Testcontainers.
 
-### IV. Traceable to Azure DevOps
-Every `tasks.md` task maps to an Azure DevOps work item (Epic → Feature → Story), and every
-PR references its Story. The spec's feature id is the correlation key across spec, ADO, branch,
-and PR. Work items are never created without explicit human approval.
+### IV. Traceable to the Backlog (JIRA & Azure DevOps)
+Requirements originate in **JIRA or Azure DevOps**. The originating **ticket id is the feature id**
+(e.g. `proj-1234`, `ado-12345`) and is the single correlation key across ticket → spec → branch → PR.
+Inbound: seed `spec.md` from the ticket (`jira-to-spec` / `ado-to-spec` prompts), enriching — never
+silently overwriting — the source. Outbound: `tasks.md` produces child work items linked back under
+the same ticket (`tasks-to-ado` prompt). Every PR references its ticket id. No work item or ticket
+field is written without explicit human approval.
 
 ### V. Observable & Secure by Default
 Structured `ILogger<T>` logging only — never string interpolation in templates.
@@ -50,10 +53,12 @@ Managed Identity for every PaaS-to-PaaS hop. No secrets in code or config.
 ## Development Workflow
 
 1. `/speckit.constitution` — once per project (this file).
-2. `/speckit.specify` — write `spec.md` (what & why, every requirement testable).
+2. **Seed from the backlog (inbound)** — run `jira-to-spec` or `ado-to-spec` to generate `spec.md`
+   from the originating ticket, or run `/speckit.specify` directly for net-new work.
 3. `/speckit.clarify` — resolve ambiguity before planning (optional but recommended).
 4. `/speckit.plan` — `plan.md` + `contracts/` + `data-model.md` (tech decisions here).
-5. `/speckit.tasks` — `tasks.md`, dependency-ordered, mapped to ADO work items.
+5. `/speckit.tasks` — `tasks.md`, dependency-ordered. Then `tasks-to-ado` links child items back
+   under the originating ticket (outbound).
 6. `/speckit.analyze` — cross-artifact consistency gate (optional).
 7. `/speckit.implement` — build the vertical slice with tests.
 8. `/speckit.converge` — assess against artifacts, append remaining work. Repeat until Converged.
