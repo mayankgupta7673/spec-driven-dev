@@ -38,6 +38,31 @@ dotnet build SddDemo.slnx
 dotnet test SddDemo.slnx
 ```
 
+## Run the demo (offline, no Azure required)
+
+```powershell
+cd src/SddDemo.Functions
+func start
+```
+
+Then exercise the endpoints with [demo.http](demo.http) (REST Client extension) or PowerShell:
+
+```powershell
+# Submit an order -> 202 { correlationId }
+$body = '{"legalEntityId":"ABN-01","supplier":"ACME Pty Ltd","clientRequestId":"req-1","lines":[{"sku":"TIMBER-90X45","quantity":120,"unitPrice":7.85}]}'
+$r = Invoke-RestMethod http://localhost:7071/api/orders -Method Post -ContentType application/json -Body $body
+$r.correlationId
+
+# Query status -> 200 { state: "Accepted" }
+Invoke-RestMethod "http://localhost:7071/api/orders/$($r.correlationId)/status"
+```
+
+Demo talking points:
+- **202 + correlationId** — caller is decoupled from the slow D365 write.
+- **Idempotency** — resubmitting the same `clientRequestId` returns the original id, publishes once.
+- **Boundary validation** — missing lines or an unknown legal entity returns `400`, publishes nothing.
+- **Swap to Azure** — replace two lines in `Program.cs` (in-memory publisher/store → Service Bus + Azure SQL); Functions, services, and models are untouched.
+
 ## Next step
 
 Open `specs/001-order-submission/spec.md`, then run `/speckit.plan` in Copilot Chat to generate

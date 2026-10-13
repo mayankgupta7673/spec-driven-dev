@@ -1,0 +1,55 @@
+@host = http://localhost:7071
+
+### 1. Submit a valid purchase order -> 202 Accepted { correlationId }
+# @name submit
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "legalEntityId": "ABN-01",
+  "supplier": "ACME Pty Ltd",
+  "clientRequestId": "req-10001",
+  "lines": [
+    { "sku": "TIMBER-90X45", "quantity": 120, "unitPrice": 7.85 },
+    { "sku": "NAILS-75MM",   "quantity": 50,  "unitPrice": 19.90 }
+  ]
+}
+
+### 2. Query status by the correlation id returned above -> 200 { state: "Accepted" }
+GET {{host}}/api/orders/{{submit.response.body.correlationId}}/status
+
+### 3. Idempotent replay (same clientRequestId) -> same correlationId, no second publish
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "legalEntityId": "ABN-01",
+  "supplier": "ACME Pty Ltd",
+  "clientRequestId": "req-10001",
+  "lines": [ { "sku": "TIMBER-90X45", "quantity": 120, "unitPrice": 7.85 } ]
+}
+
+### 4. Invalid: no lines -> 400 Bad Request { errors: { Lines: [...] } }
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "legalEntityId": "ABN-01",
+  "supplier": "ACME Pty Ltd",
+  "clientRequestId": "req-bad-1",
+  "lines": []
+}
+
+### 5. Invalid: unknown legal entity -> 400 Bad Request { errors: { LegalEntityId: [...] } }
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "legalEntityId": "ZZZ-99",
+  "supplier": "ACME Pty Ltd",
+  "clientRequestId": "req-bad-2",
+  "lines": [ { "sku": "S", "quantity": 1, "unitPrice": 1 } ]
+}
+
+### 6. Unknown correlation id -> 404 Not Found
+GET {{host}}/api/orders/does-not-exist/status
