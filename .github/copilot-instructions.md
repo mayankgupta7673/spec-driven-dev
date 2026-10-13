@@ -63,3 +63,16 @@ Requirements originate in **JIRA or Azure DevOps**; the **ticket id is the featu
 - **Outbound** (tasks → work items): [.github/prompts/tasks-to-ado.prompt.md](prompts/tasks-to-ado.prompt.md).
 
 Never create or modify a ticket/work item without explicit human approval. Every PR references its ticket id.
+
+## Specialized agents
+
+Hand work to the right agent in [.github/agents/](agents/):
+
+| Agent | Use for |
+|-------|---------|
+| [spec](agents/spec.agent.md) | Driving the SDD loop + JIRA/ADO ticket↔spec↔tasks traceability |
+| [architecture](agents/architecture.agent.md) | Ports/adapters, vertical-slice rule, ADRs |
+| [backend](agents/backend.agent.md) | Writing C# (thin adapters, services, validators, models) |
+| [testing](agents/testing.agent.md) | Offline xUnit tests |
+| [review](agents/review.agent.md) | Pre-merge blocking checklist |
+| [azure](agents/azure.agent.md) | Swapping in-memory ports for real Azure services |
