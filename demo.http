@@ -53,3 +53,30 @@ Content-Type: application/json
 
 ### 6. Unknown correlation id -> 404 Not Found
 GET {{host}}/api/orders/does-not-exist/status
+
+### 7. Invalid: order total exceeds MaxOrderValue:Threshold -> 400 Bad Request { errors: { orderTotal: [...] } }
+# Default threshold is AUD 250,000; lower MaxOrderValue:Threshold in local.settings.json to see this trigger more easily.
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "legalEntityId": "ABN-01",
+  "supplier": "ACME Pty Ltd",
+  "clientRequestId": "req-bad-3",
+  "lines": [
+    { "sku": "BULK-ITEM", "quantity": 10000, "unitPrice": 500.00 }
+  ]
+}
+
+### 8. Invalid: supplier not in the approved registry -> 400 Bad Request { errors: { Supplier: [...] } }
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "legalEntityId": "ABN-01",
+  "supplier": "Unknown Supplier Pty Ltd",
+  "clientRequestId": "req-bad-4",
+  "lines": [ { "sku": "S", "quantity": 1, "unitPrice": 1 } ]
+}
+
+

@@ -4,6 +4,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using SddDemo.Functions.Functions;
 using SddDemo.Functions.Models;
@@ -18,10 +19,11 @@ public sealed class SubmitOrderFunctionTests
     private readonly InMemorySubmissionStatusStore _store = new();
     private readonly FakeTimeProvider _time = new(DateTimeOffset.Parse("2026-10-13T00:00:00Z"));
 
-    private SubmitOrderFunction CreateSut()
+    private SubmitOrderFunction CreateSut(decimal maxOrderValueThreshold = 250_000m)
     {
         var service = new SubmissionService(_publisher, _store, _time, NullLogger<SubmissionService>.Instance);
-        var validator = new PurchaseOrderValidator(new StaticLegalEntityMap());
+        var validator = new PurchaseOrderValidator(
+            new StaticLegalEntityMap(), new StaticSupplierRegistry(), Options.Create(new MaxOrderValueOptions { Threshold = maxOrderValueThreshold }));
         return new SubmitOrderFunction(validator, service, NullLogger<SubmitOrderFunction>.Instance);
     }
 
@@ -83,6 +85,46 @@ public sealed class SubmitOrderFunctionTests
         context.Request.ContentLength = 8;
 
         var result = await sut.RunAsync(context.Request, CancellationToken.None);
+
+        result.Should().BeOfType<BadRequestObjectResult>();
+        _publisher.Published.Should().BeEmpty();
+    }
+
+    // PROJ-101: Reject purchase orders that exceed a maximum total value
+
+    [Fact]
+    public async Task Should_Return400AndPublishNothing_When_OrderExceedsThreshold()
+    {
+        var sut = CreateSut(maxOrderValueThreshold: 1000m);
+        var request = JsonRequest(new
+        {
+            legalEntityId = "ABN-01",
+            supplier = "ACME Pty Ltd",
+            clientRequestId = "req-102",
+            lines = new[] { new { sku = "SKU-1", quantity = 10, unitPrice = 150.00m } } // total = 1500
+        });
+
+        var result = await sut.RunAsync(request, CancellationToken.None);
+
+        result.Should().BeOfType<BadRequestObjectResult>();
+        _publisher.Published.Should().BeEmpty();
+    }
+
+    // PROJ-102: Validate supplier against an approved supplier registry
+
+    [Fact]
+    public async Task Should_Return400AndPublishNothing_When_SupplierIsNotApproved()
+    {
+        var sut = CreateSut();
+        var request = JsonRequest(new
+        {
+            legalEntityId = "ABN-01",
+            supplier = "Unknown Supplier Pty Ltd",
+            clientRequestId = "req-103",
+            lines = new[] { new { sku = "SKU-1", quantity = 10, unitPrice = 5.00m } }
+        });
+
+        var result = await sut.RunAsync(request, CancellationToken.None);
 
         result.Should().BeOfType<BadRequestObjectResult>();
         _publisher.Published.Should().BeEmpty();

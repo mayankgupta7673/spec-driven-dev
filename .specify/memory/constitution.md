@@ -1,6 +1,6 @@
 # SDD Azure Functions Demo Constitution
 
-A gold-standard reference for Spec-Driven Development on .NET 8 isolated-worker
+A gold-standard reference for Spec-Driven Development on .NET 10 isolated-worker
 Azure Functions, with Azure DevOps work-item traceability. These principles are
 the non-negotiable guardrails every `spec → plan → tasks → implement` cycle must honour.
 
@@ -38,7 +38,7 @@ Managed Identity for every PaaS-to-PaaS hop. No secrets in code or config.
 
 ## Technology Constraints
 
-- **.NET 8 LTS, C# 12**, Azure Functions isolated worker model.
+- **.NET 10 LTS, C# 14**, Azure Functions isolated worker model.
 - **Dapper** for persistence — not EF Core. Purpose-named repositories, no generic `IRepository<T>`.
 - **System.Text.Json** with source generators. Never Newtonsoft.Json in new code.
 - **Polly v8** (`AddResilienceHandler`) for retry / circuit breaker / timeout.
@@ -72,4 +72,10 @@ This constitution supersedes ad-hoc practices. Every PR and review verifies comp
 the principles above. Complexity must be justified in the plan's Complexity Tracking section.
 Amendments require a version bump, dated entry below, and a note in the affected templates.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-13 | **Last Amended**: 2026-10-13
+### Amendment history
+
+- **1.1.0** (2026-10-16): Technology Constraints upgraded from .NET 8 LTS/C# 12 to .NET 10 LTS/C# 14
+  (isolated worker). Deploy target: Azure Functions Consumption plan via GitHub Actions. No principle
+  changed; `Models/`/`Services/`/`Validation/` remain Azure-SDK-free and offline-testable.
+
+**Version**: 1.1.0 | **Ratified**: 2026-10-13 | **Last Amended**: 2026-10-16

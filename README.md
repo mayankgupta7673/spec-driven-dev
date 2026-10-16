@@ -1,6 +1,6 @@
 # SDD Azure Functions Demo
 
-A gold-standard reference showing **Spec-Driven Development (SDD)** on **.NET 8 isolated-worker
+A gold-standard reference showing **Spec-Driven Development (SDD)** on **.NET 10 isolated-worker
 Azure Functions**, wired for **GitHub Copilot** and **JIRA + Azure DevOps** traceability.
 
 ## The idea
@@ -33,7 +33,7 @@ tasks-to-ado            → create child work items under the ticket (outbound)
 | `.github/prompts/tasks-to-ado.prompt.md` | Map `tasks.md` → ADO Epic/Feature/Story (outbound) |
 | `.github/skills/speckit-*/` | The spec-kit slash-command skills |
 | `specs/001-order-submission/` | Worked sample spec (async purchase-order submission) |
-| `src/SddDemo.Functions/` | .NET 8 isolated Functions app (thin adapters) |
+| `src/SddDemo.Functions/` | .NET 10 isolated Functions app (thin adapters) |
 | `tests/SddDemo.Functions.Tests/` | xUnit + FluentAssertions + NSubstitute (runs offline) |
 | `docs/` | Architecture docs + decision records ([index](docs/README.md)) |
 | `CONTRIBUTING.md` | How to add a feature + the vertical-slice checklist |

@@ -1,5 +1,5 @@
 ---
-description: 'Backend code agent for the SDD Azure Functions demo. Writes production-ready C# 12 / .NET 8 isolated-worker code: thin HTTP adapters, orchestration services, FluentValidation validators, immutable record models, and in-memory ports. Enforces the constitution: no Azure SDK in the core, TimeProvider over DateTime, IHttpClientFactory over new HttpClient, structured ILogger<T> logging with CorrelationId, sealed-by-default, CancellationToken everywhere. Use when writing or modifying any C# in this repo.'
+description: 'Backend code agent for the SDD Azure Functions demo. Writes production-ready C# 14 / .NET 10 isolated-worker code: thin HTTP adapters, orchestration services, FluentValidation validators, immutable record models, and in-memory ports. Enforces the constitution: no Azure SDK in the core, TimeProvider over DateTime, IHttpClientFactory over new HttpClient, structured ILogger<T> logging with CorrelationId, sealed-by-default, CancellationToken everywhere. Use when writing or modifying any C# in this repo.'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'agent', 'todo']
 model: 'Claude Sonnet 4.5'
 ---

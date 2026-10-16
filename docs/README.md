@@ -1,7 +1,7 @@
 # Documentation
 
 Authoritative docs for the **SDD Azure Functions Demo** — a gold-standard reference for
-Spec-Driven Development on .NET 8 isolated-worker Azure Functions with JIRA + Azure DevOps
+Spec-Driven Development on .NET 10 isolated-worker Azure Functions with JIRA + Azure DevOps
 traceability.
 
 > If anything here conflicts with [.specify/memory/constitution.md](../.specify/memory/constitution.md),

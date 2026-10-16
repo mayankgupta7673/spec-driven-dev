@@ -5,7 +5,7 @@ If anything here conflicts with the constitution, the constitution wins.
 
 ## What this project is
 
-A gold-standard reference for **Spec-Driven Development (SDD)** on **.NET 8 isolated-worker
+A gold-standard reference for **Spec-Driven Development (SDD)** on **.NET 10 isolated-worker
 Azure Functions**, with **Azure DevOps** work-item traceability. Every feature is built by
 running the spec-kit loop, not by ad-hoc prompting.
 
@@ -21,7 +21,7 @@ Never write production code before a `spec.md` exists for the feature.
 
 ## Stack (do not deviate without updating the constitution)
 
-- .NET 8 LTS, C# 12, Azure Functions **isolated worker**.
+- .NET 10 LTS, C# 14, Azure Functions **isolated worker**.
 - **Dapper** for persistence — not EF Core.
 - **System.Text.Json** source generators — never Newtonsoft.Json.
 - **Polly v8** `AddResilienceHandler` for retry / circuit breaker / timeout.

@@ -26,7 +26,7 @@ The worked example is an **asynchronous purchase-order submission** API:
 
 ## Technology
 
-- .NET 8 LTS, C# 12, Azure Functions isolated worker.
+- .NET 10 LTS, C# 14, Azure Functions isolated worker.
 - FluentValidation for boundary validation.
 - System.Text.Json for serialization.
 - `TimeProvider` injected for time; no `DateTime.UtcNow`.

@@ -334,7 +334,7 @@
     <div class="grid cols-4" style="margin-top:20px">
       <div class="card"><h3>Spec Kit</h3><p>Open-source SDD toolkit — the <code>/speckit.*</code> commands & templates.</p></div>
       <div class="card"><h3>GitHub Copilot</h3><p>Runs the loop inside VS Code as slash-command skills.</p></div>
-      <div class="card"><h3>Azure Functions</h3><p>.NET 8 isolated worker — the deployable unit per feature.</p></div>
+      <div class="card"><h3>Azure Functions</h3><p>.NET 10 isolated worker — the deployable unit per feature.</p></div>
       <div class="card"><h3>JIRA + ADO</h3><p>Backlog in, work items out — full round-trip traceability.</p></div>
     </div>
     <div class="mono" style="margin-top:26px">
@@ -342,6 +342,48 @@
 uvx --from git+https://github.com/github/spec-kit specify init my-app --integration copilot<br>
 <span class="c">/speckit.specify · /speckit.plan · /speckit.tasks · /speckit.implement</span>
     </div>
+  </section>
+
+  <!-- 10b DIFFERENTIATION -->
+  <section class="slide">
+    <div class="eyebrow">What we actually built</div>
+    <h2>Spec Kit gives you the loop. <span class="grad">We built the governance.</span></h2>
+    <p class="lead">The open-source toolkit is the engine. Everything that makes it safe to point at a real client codebase — the agent squad, the backlog bridge, the blocking review gate, the production-swap pattern — is ours.</p>
+    <div class="two" style="margin-top:10px">
+      <div class="card">
+        <h3>📦 Stock GitHub Spec Kit</h3>
+        <ul class="clean" style="margin-top:12px">
+          <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><span class="muted"><code>/speckit.*</code> commands & markdown templates</span></span></li>
+          <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><span class="muted">One generic agent follows the loop</span></span></li>
+          <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><span class="muted">You write your own constitution, from scratch</span></span></li>
+          <li><span class="check x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span><span class="muted">No backlog connection, no pre-merge gate</span></span></li>
+        </ul>
+      </div>
+      <div class="card" style="border-left:3px solid var(--brand2)">
+        <h3>🛠️ Engineered on top, for this client</h3>
+        <ul class="clean" style="margin-top:12px">
+          <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>6 role-bound agents</b> <span class="muted">— each owns and enforces one slice of the constitution</span></span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Backlog round-trip</b> <span class="muted">— JIRA/ADO ⇄ spec, ticket id = feature id, nothing written without approval</span></span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Blocking review gate</b> <span class="muted">— SOLID, OWASP, observability — checked before merge, not after</span></span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Production-safe by construction</b> <span class="muted">— ports/adapters + a dedicated swap playbook (Managed Identity, Polly v8)</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10c AGENT SQUAD -->
+  <section class="slide">
+    <div class="eyebrow">Division of labor, not one mega-prompt</div>
+    <h2>Six agents, <span class="grad">one constitution</span>, zero drift</h2>
+    <div class="grid cols-3" style="margin-top:18px">
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg></span>Spec</h3><p>Drives the whole loop and the ticket↔spec↔PR correlation id. Never writes to JIRA/ADO without human approval.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1M9 13h1m4 0h1"/></svg></span>Architecture</h3><p>Enforces ports/adapters, the thin-adapter rule, one-context-one-Function-App. Generates the ADR, blocks the merge otherwise.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></span>Backend</h3><p>Writes the C# — and refuses the forbidden list: static mutable state, <code>DateTime.Now</code>, <code>new HttpClient()</code>, generic <code>IRepository&lt;T&gt;</code>, Helper/Manager/Util classes.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Testing</h3><p>Offline-only: <code>FakeTimeProvider</code>, no <code>Thread.Sleep</code>, no random data — so <code>dotnet test</code> never touches Azure.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>Review</h3><p>A blocking checklist across traceability, SOLID/DI, observability, and OWASP — any failure requests changes before it reaches <code>main</code>.</p></div>
+      <div class="card"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>Azure</h3><p>The demo→production swap playbook: Service Bus + Azure SQL/Dapper, Managed Identity on every hop, Polly v8 resilience — <i>DI-only</i>, the core never changes.</p></div>
+    </div>
+    <p class="lead" style="margin-top:18px">Every agent reads the same <code>constitution.md</code> — so "agentic" doesn't mean unpredictable.</p>
   </section>
 
   <!-- KEY TAKEAWAYS -->

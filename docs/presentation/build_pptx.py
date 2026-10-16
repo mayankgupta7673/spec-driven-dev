@@ -358,7 +358,7 @@ for i, (h, b) in enumerate(cards):
 s = slide(); eyebrow(s, "How we run it"); title(s, "The toolchain")
 tools = [("Spec Kit", "Open-source SDD toolkit — the /speckit.* commands & templates."),
          ("GitHub Copilot", "Runs the loop inside VS Code as slash-command skills."),
-         ("Azure Functions", ".NET 8 isolated worker — the deployable unit per feature."),
+         ("Azure Functions", ".NET 10 isolated worker — the deployable unit per feature."),
          ("JIRA + ADO", "Backlog in, work items out — full round-trip traceability.")]
 cw = Inches(2.85)
 for i, (h, b) in enumerate(tools):
